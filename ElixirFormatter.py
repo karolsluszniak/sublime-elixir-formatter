@@ -86,6 +86,38 @@ class ElixirFormatter:
 
         return MixFormatResult(stdout, stderr, exit_code)
 
+    @staticmethod
+    def run_command(project_root, task_args):
+        settings = sublime.load_settings('Preferences.sublime-settings')
+        env = os.environ.copy()
+
+        try:
+            env['PATH'] = os.pathsep.join([settings.get('env')['PATH'], env['PATH']])
+        except (TypeError, ValueError, KeyError):
+            pass
+
+        if sublime.platform() == "windows":
+            launcher = ['cmd', '/c']
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        else:
+            launcher = []
+            startupinfo = None
+
+        process = subprocess.Popen(
+            launcher + task_args,
+            cwd = project_root,
+            env = env,
+            stdout = subprocess.PIPE,
+            stderr = subprocess.PIPE,
+            startupinfo = startupinfo)
+
+        stdout, stderr = process.communicate()
+        stdout = stdout.decode('utf-8')
+        stderr = stderr.decode('utf-8')
+
+        return [stdout, stderr]
+
     check_blacklisted_script_template = """
       file = \"[[file]]\"
       formatter = \".formatter.exs\"
