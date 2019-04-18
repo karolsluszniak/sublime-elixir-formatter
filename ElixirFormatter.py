@@ -9,6 +9,7 @@ SYNTAX_ERROR_RE = re.compile(
     r"^\*\*\s\((.+)\)\s(.+)\:(\d+)\:\s(.+)$",
     re.MULTILINE | re.IGNORECASE | re.UNICODE)
 PLUGIN_NAME = "ElixirFormatter"
+PLUGIN_CMD_NAME = "elixir_formatter_format_file"
 
 class ElixirFormatter:
     @staticmethod
@@ -115,7 +116,7 @@ class ElixirFormatterFormatFileCommand(sublime_plugin.TextCommand):
 class ElixirFormatterEventListeners(sublime_plugin.EventListener):
     @staticmethod
     def on_pre_save(view):
-        view.run_command("elixir_formatter_format_file")
+        view.run_command(PLUGIN_CMD_NAME)
 
 class MixFormatError:
     def __init__(self, text):
@@ -192,5 +193,6 @@ class Utils:
     def replace(view, edit, region, text):
         view.replace(edit, region, text)
 
+    @staticmethod
     def st_status_message(msg):
         sublime.set_timeout(lambda: sublime.status_message('{0}: {1}'.format(PLUGIN_NAME, msg)), 0)
